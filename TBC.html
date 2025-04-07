@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Thrones Quiz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1a1d;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #2b2b30;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        .question {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #444;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .options button:hover {
+            background: #666;
+        }
+        .correct {
+            background: green !important;
+        }
+        .wrong {
+            background: red !important;
+        }
+        #leaderboard {
+            margin-top: 20px;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        #leaderboard h2 {
+            margin-bottom: 10px;
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Game of Thrones Quiz</h1>
+        <div id="nameInput">
+            <input type="text" id="playerName" placeholder="Enter your name" />
+            <button onclick="startQuiz()">Start</button>
+        </div>
+        <div id="quiz" style="display:none;">
+            <p class="question" id="question"></p>
+            <div class="options" id="options"></div>
+        </div>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboardList"></ul>
+        </div>
+    </div>
+    <script>
+        const questions = [
+            { question: "Who was the first character to die in the series?", options: ["Ned Stark", "Waymar Royce", "Robert Baratheon", "Joffrey Baratheon"], answer: "Waymar Royce" },
+            { question: "What is the name of Jon Snow's direwolf?", options: ["Ghost", "Nymeria", "Shaggydog", "Summer"], answer: "Ghost" },
+            { question: "Who said 'Chaos is a ladder'?", options: ["Littlefinger", "Varys", "Tyrion Lannister", "Cersei Lannister"], answer: "Littlefinger" },
+            { question: "Which house has a sigil of a golden rose?", options: ["Targaryen", "Tyrell", "Martell", "Arryn"], answer: "Tyrell" },
+            { question: "What is the motto of House Stark?", options: ["Fire and Blood", "A Lannister Always Pays His Debts", "Ours is the Fury", "Winter is Coming"], answer: "Winter is Coming" },
+            { question: "Who was the last ruler to sit on the Iron Throne?", options: ["Jon Snow", "Bran Stark", "Daenerys Targaryen", "Sansa Stark"], answer: "Bran Stark" },
+            { question: "What is the real name of The Mountain?", options: ["Sandor Clegane", "Gregor Clegane", "Bronn", "Rhaegar Targaryen"], answer: "Gregor Clegane" },
+            { question: "Who is known as the 'Mother of Dragons'?", options: ["Cersei Lannister", "Melisandre", "Daenerys Targaryen", "Arya Stark"], answer: "Daenerys Targaryen" },
+            { question: "Which character killed the Night King?", options: ["Jon Snow", "Arya Stark", "Bran Stark", "Jaime Lannister"], answer: "Arya Stark" },
+            { question: "Who was the last Targaryen king before Robert's Rebellion?", options: ["Viserys Targaryen", "Aerys II Targaryen", "Daemon Targaryen", "Maegor the Cruel"], answer: "Aerys II Targaryen" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let playerName = "";
+
+        function startQuiz() {
+            playerName = document.getElementById("playerName").value;
+            if (!playerName) return alert("Enter your name!");
+            document.getElementById("nameInput").style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            let q = questions[currentQuestionIndex];
+            document.getElementById("question").innerText = q.question;
+            let optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+            q.options.forEach(option => {
+                let button = document.createElement("button");
+                button.innerText = option;
+                button.onclick = () => checkAnswer(button, option);
+                optionsDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(button, selected) {
+            let correctAnswer = questions[currentQuestionIndex].answer;
+            if (selected === correctAnswer) {
+                button.classList.add("correct");
+                score++;
+            } else {
+                button.classList.add("wrong");
+            }
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    loadQuestion();
+                } else {
+                    saveScore();
+                }
+            }, 1000);
+        }
+
+        function saveScore() {
+            let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+            leaderboard.push({ name: playerName, score });
+            leaderboard.sort((a, b) => b.score - a.score);
+            localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+            let list = document.getElementById("leaderboardList");
+            list.innerHTML = "";
+            leaderboard.forEach(entry => {
+                let li = document.createElement("li");
+                li.innerText = `${entry.name}: ${entry.score}`;
+                list.appendChild(li);
+            });
+        }
+
+        displayLeaderboard();
+    </script>
+</body>
+</html>
